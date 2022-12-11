@@ -1,4 +1,5 @@
-use reqwest::{Client as ReqwestClient, Response as ReqwestReponse, Url};
+use reqwest::blocking::{Client as ReqwestClient, Response as ReqwestReponse};
+use reqwest::Url;
 use serde::Serialize;
 use std::time::Duration;
 
@@ -192,14 +193,14 @@ impl Client {
         }
     }
 
-    fn handle_response(&mut self, mut resp: ReqwestReponse) -> Result<Vec<Response>, Error> {
-        let body = resp
-            .text()
-            .map_err(|_| Error::new("Could not get the response body"))?;
+    fn handle_response(&mut self, resp: ReqwestReponse) -> Result<Vec<Response>, Error> {
         let cookies = resp
             .cookies()
             .map(|c| c.value().to_owned())
             .collect::<Vec<_>>();
+        let body = resp
+            .text()
+            .map_err(|_| Error::new("Could not get the response body"))?;
         let mut responses = vec![];
 
         log::debug!("Received response from cometd server: {:?}", body);
